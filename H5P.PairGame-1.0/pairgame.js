@@ -22,10 +22,10 @@ H5P.PairGame = (function (EventDispatcher, $) {
     // Initialize event inheritance
     EventDispatcher.call(self);
 
-    var flipped, timer, popup, $bottom, $taskComplete, $feedback, $wrapper, maxWidth, numCols;
+    var selectedcard, timer, popup, $bottom, $taskComplete, $feedback, $wrapper, maxWidth, numCols;
     var cards = [];
-    var flipBacks = []; // Que of cards to be flipped back
-    var numFlipped = 0;
+    var unselectedcards = []; // Que of cards to be unselected
+    var numSelected = 0;
     var removed = 0;
     numInstances++;
 
@@ -49,32 +49,32 @@ H5P.PairGame = (function (EventDispatcher, $) {
      *
      * @private
      * @param {H5P.PairGame.Card} card
-     * @param {H5P.PairGame.Card} mate
+     * @param {H5P.PairGame.Card} second
      * @param {H5P.PairGame.Card} correct
      */
-    var check = function (card, mate, correct) {
-      if (mate !== correct) {
-        // Incorrect, must be scheduled for flipping back
-        flipBacks.push(card);
-        flipBacks.push(mate);
+    var check = function (card, second, correct) {
+      if (second !== correct) {
+        // Incorrect, must be scheduled for unselected
+        unselectedcards.push(card);
+        unselectedcards.push(second);
 
-        // Wait for next click to flip them back…
-        if (numFlipped > 2) {
+        // Wait for next click to unselect them.
+        if (numSelected > 2) {
           // or do it straight away
-          processFlipBacks();
+          processUnselect();
         }
         return;
       }
 
       // Update counters
-      numFlipped -= 2;
+      numSelected -= 2;
       removed += 2;
 
       var isFinished = (removed === cards.length);
 
       // Remove them from the game.
       card.remove(!isFinished);
-      mate.remove();
+      second.remove();
 
       var desc = card.getFeedback();
       if (desc !== undefined) {
@@ -82,7 +82,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
         timer.pause();
         var imgs = [card.getImage()];
         if (card.hasTwoImages) {
-          imgs.push(mate.getImage());
+          imgs.push(second.getImage());
         }
         popup.show(desc, imgs, cardStyles ? cardStyles.back : undefined, function (refocus) {
           if (isFinished) {
@@ -169,7 +169,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
       H5P.shuffleArray(cards);
 
       setTimeout(function () {
-        // Re-append to DOM after flipping back
+        // Re-append to DOM after unselecting
         for (var i = 0; i < cards.length; i++) {
           cards[i].reAppend();
         }
@@ -208,16 +208,15 @@ H5P.PairGame = (function (EventDispatcher, $) {
     };
 
     /**
-     * Adds card to card list and set up a flip listener.
+     * Adds card to card list and set up a select listener.
      *
      * @private
      * @param {H5P.PairGame.Card} card
-     * @param {H5P.PairGame.Card} mate
+     * @param {H5P.PairGame.Card} second
      */
-    var addCard = function (card, mate) {
-      card.on('flip', function () {
-        console.log(card.toLocaleString());
-        // Always return focus to the card last flipped
+    var addCard = function (card, second) {
+      card.on('selectcard', function () {
+        // Always return focus to the card last selected
         for (var i = 0; i < cards.length; i++) {
           cards[i].makeUntabbable();
         }
@@ -228,31 +227,31 @@ H5P.PairGame = (function (EventDispatcher, $) {
         // Keep track of time spent
         timer.play();
 
-        // Keep track of the number of flipped cards
-        numFlipped++;
+        // Keep track of the number of selected cards
+        numSelected++;
 
         // Announce the card unless it's the last one and it's correct
-        var isMatched = (flipped === mate);
+        var isMatched = (selectedcard === second);
         var isLast = ((removed + 2) === cards.length);
         card.updateLabel(isMatched, !(isMatched && isLast));
 
-        if (flipped !== undefined) {
-          var matie = flipped;
-          // Reset the flipped card.
-          flipped = undefined;
+        if (selectedcard !== undefined) {
+          var selectedold = selectedcard;
+          // Reset the selected card.
+          selectedcard = undefined;
 
           setTimeout(function () {
-            check(card, matie, mate);
+            check(card, selectedold, second);
           }, 100);
         }
         else {
-          if (flipBacks.length > 1) {
-            // Turn back any flipped cards
-            processFlipBacks();
+          if (unselectedcards.length > 1) {
+            // Unselect any selected cards
+            processUnselect();
           }
 
-          // Keep track of the flipped card.
-          flipped = card;
+          // Keep track of the selected card.
+          selectedcard = card;
         }
       });
 
@@ -326,13 +325,13 @@ H5P.PairGame = (function (EventDispatcher, $) {
     };
 
     /**
-     * Will flip back two and two cards
+     * Will unselect two and two cards
      */
-    var processFlipBacks = function () {
-      flipBacks[0].flipBack();
-      flipBacks[1].flipBack();
-      flipBacks.splice(0, 2);
-      numFlipped -= 2;
+    var processUnselect = function () {
+      unselectedcards[0].unselect();
+      unselectedcards[1].unselect();
+      unselectedcards.splice(0, 2);
+      numSelected -= 2;
     };
 
     /**
@@ -358,15 +357,8 @@ H5P.PairGame = (function (EventDispatcher, $) {
         // Create first card
         var cardTwo, cardOne = new PairGame.Card(cardParams.image, id, cardParams.imageAlt, parameters.l10n, cardParams.feedback, cardStyles);
 
-        if (PairGame.Card.hasTwoImages(cardParams)) {
-          // Use matching image for card two
-          cardTwo = new PairGame.Card(cardParams.match, id, cardParams.matchAlt, parameters.l10n, cardParams.feedback, cardStyles);
-          cardOne.hasTwoImages = true;
-        }
-        else {
-          // Add two cards with the same image
-          cardTwo = new PairGame.Card(cardParams.image, id, cardParams.imageAlt, parameters.l10n, cardParams.feedback, cardStyles);
-        }
+        cardTwo = new PairGame.Card(cardParams.match, id, cardParams.matchAlt, parameters.l10n, cardParams.feedback, cardStyles);
+        cardOne.hasTwoImages = true;
 
         // Add cards to card list for shuffeling
         addCard(cardOne, cardTwo);

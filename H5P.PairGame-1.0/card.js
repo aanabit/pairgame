@@ -19,7 +19,7 @@
     // Initialize event inheritance
     EventDispatcher.call(self);
 
-    var path, width, height, $card, $wrapper, removedState, flippedState;
+    var path, width, height, $card, $wrapper, removedState, selectedState;
 
     if (image && image.path) {
       path = H5P.getPath(image.path, id);
@@ -67,26 +67,26 @@
     };
 
     /**
-     * Flip card.
+     * Select card.
      */
-    self.flip = function () {
-      if (flippedState) {
+    self.select = function () {
+      if (selectedState) {
         $wrapper.blur().focus(); // Announce card label again
         return;
       }
 
       $card.addClass('h5p-selected');
-      self.trigger('flip');
-      flippedState = true;
+      self.trigger('selectcard');
+      selectedState = true;
     };
 
     /**
-     * Flip card back.
+     * Unselect card.
      */
-    self.flipBack = function () {
+    self.unselect = function () {
       self.updateLabel(null, null, true); // Reset card label
       $card.removeClass('h5p-selected');
-      flippedState = false;
+      selectedState = false;
     };
 
     /**
@@ -103,9 +103,10 @@
      */
     self.reset = function () {
       self.updateLabel(null, null, true); // Reset card label
-      flippedState = false;
+      selectedState = false;
       removedState = false;
       $card[0].classList.remove('h5p-matched');
+      $card[0].classList.remove('h5p-selected');
     };
 
     /**
@@ -142,7 +143,7 @@
           switch (event.which) {
             case 13: // Enter
             case 32: // Space
-              self.flip();
+              self.select();
               event.preventDefault();
               return;
             case 39: // Right
@@ -174,7 +175,7 @@
       $card = $wrapper.children('.h5p-memory-card')
         .children('.h5p-card')
           .click(function () {
-            self.flip();
+            self.select();
           })
           .end();
     };
@@ -249,9 +250,7 @@
    * @returns {boolean}
    */
   PairGame.Card.hasTwoImages = function (params) {
-    return (params !== undefined &&
-             (params.match !== undefined &&
-              params.match.path !== undefined));
+    return true;
   };
 
   /**

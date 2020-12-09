@@ -1,9 +1,9 @@
 (function (PairGame, EventDispatcher, $) {
 
   /**
-   * Controls all the operations for each card.
+   * Controls all the operations for each pair.
    *
-   * @class H5P.PairGame.Card
+   * @class H5P.PairGame.Pair
    * @extends H5P.EventDispatcher
    * @param {Object} image
    * @param {number} id
@@ -12,14 +12,14 @@
    * @param {string} [feedback]
    * @param {Object} [styles]
    */
-  PairGame.Card = function (image, id, alt, l10n, feedback, styles) {
-    /** @alias H5P.PairGame.Card# */
+  PairGame.Pair = function (image, id, alt, l10n, feedback, styles) {
+    /** @alias H5P.PairGame.Pair# */
     var self = this;
 
     // Initialize event inheritance
     EventDispatcher.call(self);
 
-    var path, width, height, $card, $wrapper, removedState, selectedState;
+    var path, width, height, $pair, $wrapper, removedState, selectedState;
 
     if (image && image.path) {
       path = H5P.getPath(image.path, id);
@@ -40,52 +40,52 @@
     }
 
     /**
-     * Update the cards label to make it accessible to users with a readspeaker
+     * Update the pairs label to make it accessible to users with a readspeaker
      *
-     * @param {boolean} isMatched The card has been matched
-     * @param {boolean} announce Announce the current state of the card
+     * @param {boolean} isMatched The pair has been matched
+     * @param {boolean} announce Announce the current state of the pair
      * @param {boolean} reset Go back to the default label
      */
     self.updateLabel = function (isMatched, announce, reset) {
 
       // Determine new label from input params
-      var label = (reset ? l10n.cardUnturned : alt);
+      var label = (reset ? l10n.pairUnturned : alt);
       if (isMatched) {
-        label = l10n.cardMatched + ' ' + label;
+        label = l10n.pairMatched + ' ' + label;
       }
 
-      // Update the card's label
-      $wrapper.attr('aria-label', l10n.cardPrefix.replace('%num', $wrapper.index() + 1) + ' ' + label);
+      // Update the pair's label
+      $wrapper.attr('aria-label', l10n.pairPrefix.replace('%num', $wrapper.index() + 1) + ' ' + label);
 
       // Update disabled property
       $wrapper.attr('aria-disabled', reset ? null : 'true');
 
       // Announce the label change
       if (announce) {
-        $wrapper.blur().focus(); // Announce card label
+        $wrapper.blur().focus(); // Announce pair label
       }
     };
 
     /**
-     * Select card.
+     * Select pair.
      */
     self.select = function () {
       if (selectedState) {
-        $wrapper.blur().focus(); // Announce card label again
+        $wrapper.blur().focus(); // Announce pair label again
         return;
       }
 
-      $card.addClass('h5p-selected');
-      self.trigger('selectcard');
+      $pair.addClass('h5p-selected');
+      self.trigger('selectpair');
       selectedState = true;
     };
 
     /**
-     * Unselect card.
+     * Unselect pair.
      */
     self.unselect = function () {
-      self.updateLabel(null, null, true); // Reset card label
-      $card.removeClass('h5p-selected');
+      self.updateLabel(null, null, true); // Reset pair label
+      $pair.removeClass('h5p-selected');
       selectedState = false;
     };
 
@@ -93,24 +93,24 @@
      * Remove.
      */
     self.remove = function () {
-      $card.addClass('h5p-selected');
-      $card.addClass('h5p-matched');
+      $pair.addClass('h5p-selected');
+      $pair.addClass('h5p-matched');
       removedState = true;
     };
 
     /**
-     * Reset card to natural state
+     * Reset pair to natural state
      */
     self.reset = function () {
-      self.updateLabel(null, null, true); // Reset card label
+      self.updateLabel(null, null, true); // Reset pair label
       selectedState = false;
       removedState = false;
-      $card[0].classList.remove('h5p-matched');
-      $card[0].classList.remove('h5p-selected');
+      $pair[0].classList.remove('h5p-matched');
+      $pair[0].classList.remove('h5p-selected');
     };
 
     /**
-     * Get card feedback.
+     * Get pair feedback.
      *
      * @returns {string}
      */
@@ -124,11 +124,11 @@
      * @returns {H5P.jQuery}
      */
     self.getImage = function () {
-      return $card.find('img').clone();
+      return $pair.find('img').clone();
     };
 
     /**
-     * Append card to the given container.
+     * Append pair to the given container.
      *
      * @param {H5P.jQuery} $container
      */
@@ -159,20 +159,20 @@
               event.preventDefault();
               return;
             case 35:
-              // Move to last card
+              // Move to last pair
               self.trigger('last');
               event.preventDefault();
               return;
             case 36:
-              // Move to first card
+              // Move to first pair
               self.trigger('first');
               event.preventDefault();
               return;
           }
         });
 
-      $wrapper.attr('aria-label', l10n.cardPrefix.replace('%num', $wrapper.index() + 1) + ' ' + l10n.cardUnturned);
-      $card = $wrapper.children('.h5p-memory-card')
+      $wrapper.attr('aria-label', l10n.pairPrefix.replace('%num', $wrapper.index() + 1) + ' ' + l10n.pairUnturned);
+      $pair = $wrapper.children('.h5p-memory-card')
         .children('.h5p-card')
           .click(function () {
             self.select();
@@ -189,7 +189,7 @@
     };
 
     /**
-     * Make the card accessible when tabbing
+     * Make the pair accessible when tabbing
      */
     self.makeTabbable = function () {
       if ($wrapper) {
@@ -198,7 +198,7 @@
     };
 
     /**
-     * Prevent tabbing to the card
+     * Prevent tabbing to the pair
      */
     self.makeUntabbable = function () {
       if ($wrapper) {
@@ -207,7 +207,7 @@
     };
 
     /**
-     * Make card tabbable and move focus to it
+     * Make pair tabbable and move focus to it
      */
     self.setFocus = function () {
       self.makeTabbable();
@@ -217,7 +217,7 @@
     };
 
     /**
-     * Check if the card has been removed from the game, i.e. if has
+     * Check if the pair has been removed from the game, i.e. if has
      * been matched.
      */
     self.isRemoved = function () {
@@ -226,40 +226,40 @@
   };
 
   // Extends the event dispatcher
-  PairGame.Card.prototype = Object.create(EventDispatcher.prototype);
-  PairGame.Card.prototype.constructor = PairGame.Card;
+  PairGame.Pair.prototype = Object.create(EventDispatcher.prototype);
+  PairGame.Pair.prototype.constructor = PairGame.Pair;
 
   /**
    * Check to see if the given object corresponds with the semantics for
-   * a memory game card.
+   * a memory game pair.
    *
    * @param {object} params
    * @returns {boolean}
    */
-  PairGame.Card.isValid = function (params) {
+  PairGame.Pair.isValid = function (params) {
     return (params !== undefined &&
              (params.image !== undefined &&
              params.image.path !== undefined));
   };
 
   /**
-   * Checks to see if the card parameters should create cards with different
+   * Checks to see if the pair parameters should create pair with different
    * images.
    *
    * @param {object} params
    * @returns {boolean}
    */
-  PairGame.Card.hasTwoImages = function (params) {
+  PairGame.Pair.hasTwoImages = function (params) {
     return true;
   };
 
   /**
-   * Determines the theme for how the cards should look
+   * Determines the theme for how the pair should look
    *
    * @param {string} color The base color selected
    * @param {number} invertShades Factor used to invert shades in case of bad contrast
    */
-  PairGame.Card.determineStyles = function (color, invertShades) {
+  PairGame.Pair.determineStyles = function (color, invertShades) {
     var styles =  {
       front: '',
       back: ''

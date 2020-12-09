@@ -1,7 +1,7 @@
 (function (PairGame, $) {
 
   /**
-   * A dialog for reading the description of a card.
+   * A dialog for reading the description of a pair.
    *
    * @class H5P.PairGame.Popup
    * @param {H5P.jQuery} $container

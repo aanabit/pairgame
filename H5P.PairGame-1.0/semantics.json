@@ -1,6 +1,6 @@
 [
   {
-    "name": "cards",
+    "name": "pairs",
     "type": "list",
     "widgets": [
       {
@@ -55,7 +55,7 @@
           "importance": "low",
           "maxLength": 150,
           "optional": true,
-          "description": "An optional short text that will pop up once the two matching cards are found."
+          "description": "An optional short text that will pop up once the two matching pairs are found."
         }
       ]
     }
@@ -90,7 +90,7 @@
         "type": "text",
         "label": "Theme Color",
         "importance": "low",
-        "description": "Choose a color to create a theme for your card game.",
+        "description": "Choose a color to create a theme for your pairing game.",
         "optional": true,
         "default": "#909090",
         "widget": "colorSelector",
@@ -108,7 +108,7 @@
     "common": true,
     "fields": [
       {
-        "label": "Card turns text",
+        "label": "Pair turns text",
         "importance": "low",
         "name": "cardTurns",
         "type": "text",

@@ -3,7 +3,7 @@
   "description": "See how many elements you can pair!",
   "majorVersion": 1,
   "minorVersion": 0,
-  "patchVersion": 52,
+  "patchVersion": 53,
   "runnable": 1,
   "author": "Amaia Anabitarte",
   "license": "MIT",
@@ -18,7 +18,7 @@
       "path": "pairgame.js"
     },
     {
-      "path": "card.js"
+      "path": "pair.js"
     },
     {
       "path": "popup.js"

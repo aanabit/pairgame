@@ -9,10 +9,10 @@
    * @param {number} id
    * @param {string} alt
    * @param {Object} l10n Localization
-   * @param {string} [description]
+   * @param {string} [feedback]
    * @param {Object} [styles]
    */
-  PairGame.Card = function (image, id, alt, l10n, description, styles) {
+  PairGame.Card = function (image, id, alt, l10n, feedback, styles) {
     /** @alias H5P.PairGame.Card# */
     var self = this;
 
@@ -20,8 +20,6 @@
     EventDispatcher.call(self);
 
     var path, width, height, $card, $wrapper, removedState, flippedState;
-
-    alt = alt || 'Missing description'; // Default for old games
 
     if (image && image.path) {
       path = H5P.getPath(image.path, id);
@@ -40,7 +38,6 @@
         width = height = '100%';
       }
     }
-   }
 
     /**
      * Update the cards label to make it accessible to users with a readspeaker
@@ -78,7 +75,7 @@
         return;
       }
 
-      $card.addClass('h5p-flipped');
+      $card.addClass('h5p-selected');
       self.trigger('flip');
       flippedState = true;
     };
@@ -88,7 +85,7 @@
      */
     self.flipBack = function () {
       self.updateLabel(null, null, true); // Reset card label
-      $card.removeClass('h5p-flipped');
+      $card.removeClass('h5p-selected');
       flippedState = false;
     };
 
@@ -96,6 +93,7 @@
      * Remove.
      */
     self.remove = function () {
+      $card.addClass('h5p-selected');
       $card.addClass('h5p-matched');
       removedState = true;
     };
@@ -107,16 +105,16 @@
       self.updateLabel(null, null, true); // Reset card label
       flippedState = false;
       removedState = false;
-      $card[0].classList.remove('h5p-flipped', 'h5p-matched');
+      $card[0].classList.remove('h5p-matched');
     };
 
     /**
-     * Get card description.
+     * Get card feedback.
      *
      * @returns {string}
      */
-    self.getDescription = function () {
-      return description;
+    self.getFeedback = function () {
+      return feedback;
     };
 
     /**
@@ -135,9 +133,8 @@
      */
     self.appendTo = function ($container) {
       $wrapper = $('<li class="h5p-memory-wrap" tabindex="-1" role="button"><div class="h5p-memory-card">' +
-                  '<div class="h5p-front"' + (styles && styles.front ? styles.front : '') + '>' + '</div>' +
-                  '<div class="h5p-back"' + (styles && styles.back ? styles.back : '') + '>' +
-                    (path ? '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>' : '<i class="h5p-memory-audio-instead-of-image">') +
+                  '<div class="h5p-card"' + (styles && styles.back ? styles.back : '') + '>' +
+                    (path ? '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>' : '') +
                   '</div>' +
                 '</div></li>')
         .appendTo($container)
@@ -175,7 +172,7 @@
 
       $wrapper.attr('aria-label', l10n.cardPrefix.replace('%num', $wrapper.index() + 1) + ' ' + l10n.cardUnturned);
       $card = $wrapper.children('.h5p-memory-card')
-        .children('.h5p-front')
+        .children('.h5p-card')
           .click(function () {
             self.flip();
           })
@@ -225,6 +222,7 @@
     self.isRemoved = function () {
       return removedState;
     };
+  };
 
   // Extends the event dispatcher
   PairGame.Card.prototype = Object.create(EventDispatcher.prototype);
@@ -265,7 +263,7 @@
   PairGame.Card.determineStyles = function (color, invertShades) {
     var styles =  {
       front: '',
-      back: '',
+      back: ''
     };
 
     // Create color theme

@@ -3,7 +3,7 @@
   "description": "See how many elements you can pair!",
   "majorVersion": 1,
   "minorVersion": 0,
-  "patchVersion": 26,
+  "patchVersion": 48,
   "runnable": 1,
   "author": "Amaia Anabitarte",
   "license": "MIT",
@@ -19,9 +19,6 @@
     },
     {
       "path": "card.js"
-    },
-    {
-      "path": "counter.js"
     },
     {
       "path": "popup.js"

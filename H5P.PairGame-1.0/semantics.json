@@ -20,21 +20,29 @@
       "importance": "high",
       "fields": [
         {
-          "name": "image",
+          "name": "pairingimage",
           "type": "image",
           "label": "Image",
           "importance": "high",
           "ratio": 1
         },
         {
-          "name": "imageAlt",
+          "name": "pairingimagealt",
           "type": "text",
           "label": "Alternative text for Image",
           "importance": "high",
           "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
         },
         {
-          "name": "match",
+          "name": "pairingtext",
+          "type": "text",
+          "label": "Text to pair",
+          "importance": "high",
+          "widget": "html",
+          "tags": ["strong", "em", "u", "strike", "ul", "ol"]
+        },
+        {
+          "name": "matchingimage",
           "type": "image",
           "label": "Matching Image",
           "importance": "high",
@@ -42,11 +50,19 @@
           "ratio": 1
         },
         {
-          "name": "matchAlt",
+          "name": "matchingimagealt",
           "type": "text",
           "label": "Alternative text for Matching Image",
           "importance": "high",
           "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
+        },
+        {
+          "name": "matchingtext",
+          "type": "text",
+          "label": "Text to pair",
+          "importance": "high",
+          "widget": "textarea",
+          "tags": ["strong", "em", "u", "strike", "ul", "ol"]
         },
         {
           "name": "feedback",

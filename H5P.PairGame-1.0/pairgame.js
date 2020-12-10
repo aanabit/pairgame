@@ -24,6 +24,8 @@ H5P.PairGame = (function (EventDispatcher, $) {
 
     var selectedpair, timer, popup, $bottom, $taskComplete, $feedback, $wrapper, maxWidth, numCols;
     var pairs = [];
+    var leftpairs = [];
+    var rightpairs = [];
     var unselectedpairs = []; // Que of pairs to be unselected
     var numSelected = 0;
     var removed = 0;
@@ -81,9 +83,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
         // Pause timer and show desciption.
         timer.pause();
         var imgs = [pair.getImage()];
-        if (pair.hasTwoImages) {
-          imgs.push(second.getImage());
-        }
+        imgs.push(second.getImage());
         popup.show(desc, imgs, cardStyles ? cardStyles.back : undefined, function (refocus) {
           if (isFinished) {
             // Game done
@@ -166,12 +166,12 @@ H5P.PairGame = (function (EventDispatcher, $) {
       timer.reset();
 
       // Randomize pairs
-      H5P.shuffleArray(pairs);
+      H5P.shuffleArray(rightpairs);
 
       setTimeout(function () {
         // Re-append to DOM after unselecting
-        for (var i = 0; i < pairs.length; i++) {
-          pairs[i].reAppend();
+        for (var i = 0; i < rightpairs.length; i++) {
+          rightpairs[i].reAppend();
         }
         for (var j = 0; j < pairs.length; j++) {
           pairs[j].reset();
@@ -181,7 +181,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
         $wrapper.children('ul').children('.h5p-row-break').removeClass('h5p-row-break');
         maxWidth = -1;
         self.trigger('resize');
-        pairs[0].setFocus();
+        leftpairs[0].setFocus();
       }, 600);
     };
 
@@ -213,8 +213,13 @@ H5P.PairGame = (function (EventDispatcher, $) {
      * @private
      * @param {H5P.PairGame.Pair} pair
      * @param {H5P.PairGame.Pair} second
+     * @param {boolean} save
      */
-    var addPair = function (pair, second) {
+    var addPair = function (pair, second, save) {
+      if (save) {
+        leftpairs.push(pair);
+        rightpairs.push(second);
+      }
       pair.on('selectpair', function () {
         // Always return focus to the pair last selected
         for (var i = 0; i < pairs.length; i++) {
@@ -355,17 +360,16 @@ H5P.PairGame = (function (EventDispatcher, $) {
       var pairParams = pairsToUse[i];
       if (PairGame.Pair.isValid(pairParams)) {
         // Create first pair
-        var pairTwo, pairOne = new PairGame.Pair(pairParams.image, id, pairParams.imageAlt, parameters.l10n, pairParams.feedback, cardStyles);
-
-        pairTwo = new PairGame.Pair(pairParams.match, id, pairParams.matchAlt, parameters.l10n, pairParams.feedback, cardStyles);
-        pairOne.hasTwoImages = true;
+        var pairOne = new PairGame.Pair(pairParams.pairingimage, id, pairParams.pairingimagealt, pairParams.pairingtext, parameters.l10n, pairParams.feedback, cardStyles);
+        var pairTwo = new PairGame.Pair(pairParams.matchingimage, id, pairParams.matchingimagealt, pairParams.matchingtext, parameters.l10n, pairParams.feedback, cardStyles);
 
         // Add pairs to pair list for shuffeling
-        addPair(pairOne, pairTwo);
-        addPair(pairTwo, pairOne);
+        addPair(pairOne, pairTwo, true);
+        addPair(pairTwo, pairOne, false);
       }
     }
-    H5P.shuffleArray(pairs);
+    H5P.shuffleArray(leftpairs);
+    H5P.shuffleArray(rightpairs);
 
     /**
      * Attach this game's html to the given container.
@@ -385,10 +389,13 @@ H5P.PairGame = (function (EventDispatcher, $) {
         role: 'application',
         'aria-labelledby': 'h5p-intro-' + numInstances
       });
-      for (var i = 0; i < pairs.length; i++) {
-        pairs[i].appendTo($list);
+      for (var i = 0; i < leftpairs.length; i++) {
+        leftpairs[i].appendTo($list);
       }
-      pairs[0].makeTabbable();
+      for (var i = 0; i < rightpairs.length; i++) {
+        rightpairs[i].appendTo($list);
+      }
+      leftpairs[0].makeTabbable();
 
       if ($list.children().length) {
         $('<div/>', {

@@ -8,11 +8,12 @@
    * @param {Object} image
    * @param {number} id
    * @param {string} alt
+   * @param {string} text
    * @param {Object} l10n Localization
    * @param {string} [feedback]
    * @param {Object} [styles]
    */
-  PairGame.Pair = function (image, id, alt, l10n, feedback, styles) {
+  PairGame.Pair = function (image, id, alt, text, l10n, feedback, styles) {
     /** @alias H5P.PairGame.Pair# */
     var self = this;
 
@@ -119,6 +120,15 @@
     };
 
     /**
+     * Get pair feedback.
+     *
+     * @returns {string}
+     */
+    self.getText = function () {
+      return text;
+    };
+
+    /**
      * Get image clone.
      *
      * @returns {H5P.jQuery}
@@ -135,7 +145,7 @@
     self.appendTo = function ($container) {
       $wrapper = $('<li class="h5p-memory-wrap" tabindex="-1" role="button"><div class="h5p-memory-card">' +
                   '<div class="h5p-card"' + (styles && styles.back ? styles.back : '') + '>' +
-                    (path ? '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>' : '') +
+                    (path ? '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>' + text : text) +
                   '</div>' +
                 '</div></li>')
         .appendTo($container)
@@ -184,6 +194,7 @@
      * Re-append to parent container.
      */
     self.reAppend = function () {
+      console.log($wrapper[0]);
       var parent = $wrapper[0].parentElement;
       parent.appendChild($wrapper[0]);
     };
@@ -237,19 +248,12 @@
    * @returns {boolean}
    */
   PairGame.Pair.isValid = function (params) {
-    return (params !== undefined &&
-             (params.image !== undefined &&
-             params.image.path !== undefined));
-  };
+    if (params === undefined) return false;
+    if (params.pairingimage === undefined && params.pairingtext === undefined) return false;
+    if (params.pairingimage !== undefined && params.pairingimage.path === undefined) return false;
+    if (params.matchingimage === undefined && params.matchingtext === undefined) return false;
+    if (params.matchingimage !== undefined && params.matchingimage.path === undefined) return false;
 
-  /**
-   * Checks to see if the pair parameters should create pair with different
-   * images.
-   *
-   * @param {object} params
-   * @returns {boolean}
-   */
-  PairGame.Pair.hasTwoImages = function (params) {
     return true;
   };
 

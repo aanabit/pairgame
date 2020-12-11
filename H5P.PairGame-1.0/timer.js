@@ -1,7 +1,7 @@
 (function (PairGame, Timer) {
 
   /**
-   * Adapter between memory game and H5P.Timer
+   * Adapter between pairing game and H5P.Timer
    *
    * @class H5P.PairGame.Timer
    * @extends H5P.Timer

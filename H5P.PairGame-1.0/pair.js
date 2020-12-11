@@ -120,21 +120,27 @@
     };
 
     /**
-     * Get pair feedback.
-     *
-     * @returns {string}
-     */
-    self.getText = function () {
-      return text;
-    };
-
-    /**
      * Get image clone.
      *
      * @returns {H5P.jQuery}
      */
     self.getImage = function () {
-      return $pair.find('img').clone();
+      if ($pair.find('img').length > 0) {
+        return $pair.find('img').clone();
+      }
+      return false;
+    };
+
+    /**
+     * Get Text clone.
+     *
+     * @returns {H5P.jQuery}
+     */
+    self.getText = function () {
+      if ($pair.find('div.pairtext').length > 0) {
+        return $pair.find('div.pairtext').clone();
+      }
+      return false;
     };
 
     /**
@@ -143,9 +149,12 @@
      * @param {H5P.jQuery} $container
      */
     self.appendTo = function ($container) {
-      $wrapper = $('<li class="h5p-memory-wrap" tabindex="-1" role="button"><div class="h5p-memory-card">' +
-                  '<div class="h5p-card"' + (styles && styles.back ? styles.back : '') + '>' +
-                    (path ? '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>' + text : text) +
+      $wrapper = $('<li class="h5p-pair-wrap" tabindex="-1" role="button"><div class="h5p-pair-card">' +
+                  '<div class="h5p-card" ' + styles + '>' +
+                    (path ?
+                        '<img src="' + path + '" alt="' + alt + '" style="width:' + width + ';height:' + height + '"/>'
+                        : '<div class="pairtext">' + text + '</div>'
+                    ) +
                   '</div>' +
                 '</div></li>')
         .appendTo($container)
@@ -182,7 +191,7 @@
         });
 
       $wrapper.attr('aria-label', l10n.pairPrefix.replace('%num', $wrapper.index() + 1) + ' ' + l10n.pairUnturned);
-      $pair = $wrapper.children('.h5p-memory-card')
+      $pair = $wrapper.children('.h5p-pair-card')
         .children('.h5p-card')
           .click(function () {
             self.select();
@@ -194,7 +203,6 @@
      * Re-append to parent container.
      */
     self.reAppend = function () {
-      console.log($wrapper[0]);
       var parent = $wrapper[0].parentElement;
       parent.appendChild($wrapper[0]);
     };
@@ -242,7 +250,7 @@
 
   /**
    * Check to see if the given object corresponds with the semantics for
-   * a memory game pair.
+   * a pairing game.
    *
    * @param {object} params
    * @returns {boolean}
@@ -260,35 +268,11 @@
   /**
    * Determines the theme for how the pair should look
    *
-   * @param {string} color The base color selected
-   * @param {number} invertShades Factor used to invert shades in case of bad contrast
+   * @param {string} backgroundcolor
+   * @param {string} fontcolor
    */
-  PairGame.Pair.determineStyles = function (color, invertShades) {
-    var styles =  {
-      front: '',
-      back: ''
-    };
-
-    // Create color theme
-    if (color) {
-      var frontColor = shade(color, 43.75 * invertShades);
-      var backColor = shade(color, 56.25 * invertShades);
-
-      styles.front += 'color:' + color + ';' +
-                      'background-color:' + frontColor + ';' +
-                      'border-color:' + frontColor +';';
-      styles.back += 'color:' + color + ';' +
-                     'background-color:' + backColor + ';' +
-                     'border-color:' + frontColor +';';
-    }
-
-    // Prep style attribute
-    if (styles.front) {
-      styles.front = ' style="' + styles.front + '"';
-    }
-    if (styles.back) {
-      styles.back = ' style="' + styles.back + '"';
-    }
+  PairGame.Pair.determineStyles = function (backgroundcolor, fontcolor) {
+    var styles =  'style = "background-color: ' + backgroundcolor + '; color: ' + fontcolor + '"';
 
     return styles;
   };

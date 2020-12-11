@@ -22,7 +22,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
     // Initialize event inheritance
     EventDispatcher.call(self);
 
-    var selectedpair, timer, popup, $bottom, $taskComplete, $feedback, $wrapper, maxWidth, numCols;
+    var selectedpair, timer, popup, $top, $taskComplete, $feedback, $wrapper, maxWidth, numCols;
     var pairs = [];
     var leftpairs = [];
     var rightpairs = [];
@@ -82,9 +82,24 @@ H5P.PairGame = (function (EventDispatcher, $) {
       if (desc !== undefined) {
         // Pause timer and show desciption.
         timer.pause();
-        var imgs = [pair.getImage()];
-        imgs.push(second.getImage());
-        popup.show(desc, imgs, cardStyles ? cardStyles.back : undefined, function (refocus) {
+
+        var imgs = [];
+        if (second.getImage()) {
+          imgs.push(second.getImage());
+        }
+        if (pair.getImage()) {
+          imgs.push(pair.getImage());
+        }
+
+        var texts = [];
+        if (second.getText()) {
+          texts.push(second.getText());
+        }
+        if (pair.getText()) {
+          texts.push(pair.getText());
+        }
+
+        popup.show(desc, imgs, texts, cardStyles, function (refocus) {
           if (isFinished) {
             // Game done
             pair.makeUntabbable();
@@ -115,7 +130,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
       timer.stop();
       $taskComplete.show();
       $feedback.addClass('h5p-show'); // Announce
-      $bottom.focus();
+      $top.focus();
 
       // Create and trigger xAPI event 'completed'
       var completedEvent = self.createXAPIEventTemplate('completed');
@@ -128,7 +143,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
         var retryButton = createButton('reset', parameters.l10n.tryAgain || 'Reset', function () {
           // Trigger handler (action)
 
-          retryButton.classList.add('h5p-memory-transout');
+          retryButton.classList.add('h5p-pair-transout');
           setTimeout(function () {
             // Remove button on nextTick to get transition effect
             $wrapper[0].removeChild(retryButton);
@@ -136,10 +151,10 @@ H5P.PairGame = (function (EventDispatcher, $) {
 
           resetGame();
         });
-        retryButton.classList.add('h5p-memory-transin');
+        retryButton.classList.add('h5p-pair-transin');
         setTimeout(function () {
           // Remove class on nextTick to get transition effectupd
-          retryButton.classList.remove('h5p-memory-transin');
+          retryButton.classList.remove('h5p-pair-transin');
         }, 0);
 
         // Same size as pairs
@@ -191,7 +206,7 @@ H5P.PairGame = (function (EventDispatcher, $) {
      */
     var createButton = function (name, label, action) {
       var buttonElement = document.createElement('div');
-      buttonElement.classList.add('h5p-memory-' + name);
+      buttonElement.classList.add('h5p-pair-' + name);
       buttonElement.innerHTML = label;
       buttonElement.setAttribute('role', 'button');
       buttonElement.tabIndex = 0;
@@ -346,12 +361,9 @@ H5P.PairGame = (function (EventDispatcher, $) {
       return parameters.pairs;
     };
 
-    var cardStyles, invertShades;
+    var cardStyles, invertShades, pairOne, pairTwo;
     if (parameters.lookNFeel) {
-      // If the contrast between the chosen color and white is too low we invert the shades to create good contrast
-      invertShades = (parameters.lookNFeel.themeColor &&
-                      getContrast(parameters.lookNFeel.themeColor) < 1.7 ? -1 : 1);
-      cardStyles = PairGame.Pair.determineStyles(parameters.lookNFeel.themeColor, invertShades);
+      cardStyles = PairGame.Pair.determineStyles(parameters.lookNFeel.backgroundColor, parameters.lookNFeel.fontColor);
     }
 
     // Initialize pairs.
@@ -360,8 +372,16 @@ H5P.PairGame = (function (EventDispatcher, $) {
       var pairParams = pairsToUse[i];
       if (PairGame.Pair.isValid(pairParams)) {
         // Create first pair
-        var pairOne = new PairGame.Pair(pairParams.pairingimage, id, pairParams.pairingimagealt, pairParams.pairingtext, parameters.l10n, pairParams.feedback, cardStyles);
-        var pairTwo = new PairGame.Pair(pairParams.matchingimage, id, pairParams.matchingimagealt, pairParams.matchingtext, parameters.l10n, pairParams.feedback, cardStyles);
+        if (pairParams.pairType == "images" || pairParams.pairType == "mixed") {
+          pairOne = new PairGame.Pair(pairParams.pairingimage, id, pairParams.pairingimagealt, '', parameters.l10n, pairParams.feedback, cardStyles);
+        } else {
+          pairOne = new PairGame.Pair(null, id, null, pairParams.pairingtext, parameters.l10n, pairParams.feedback, cardStyles);
+        }
+        if (pairParams.pairType == "images") {
+          pairTwo = new PairGame.Pair(pairParams.matchingimage, id, pairParams.matchingimagealt, pairParams.matchingtext, parameters.l10n, pairParams.feedback, cardStyles);
+        } else {
+          pairTwo = new PairGame.Pair(null, id, null, pairParams.matchingtext, parameters.l10n, pairParams.feedback, cardStyles);
+        }
 
         // Add pairs to pair list for shuffeling
         addPair(pairOne, pairTwo, true);
@@ -379,54 +399,58 @@ H5P.PairGame = (function (EventDispatcher, $) {
     self.attach = function ($container) {
       this.triggerXAPI('attempted');
       // TODO: Only create on first attach!
-      $wrapper = $container.addClass('h5p-memory-game').html('');
+      $wrapper = $container.addClass('h5p-pair-game').html('');
       if (invertShades === -1) {
         $container.addClass('h5p-invert-shades');
       }
 
       // Add pairs to list
-      var $list = $('<ul/>', {
+      var $leftlist = $('<ul/>', {
         role: 'application',
         'aria-labelledby': 'h5p-intro-' + numInstances
       });
       for (var i = 0; i < leftpairs.length; i++) {
-        leftpairs[i].appendTo($list);
+        leftpairs[i].appendTo($leftlist);
       }
+      var $rightlist = $('<ul/>', {
+        role: 'application',
+        'aria-labelledby': 'h5p-intro-' + numInstances
+      });
       for (var i = 0; i < rightpairs.length; i++) {
-        rightpairs[i].appendTo($list);
+        rightpairs[i].appendTo($rightlist);
       }
-      leftpairs[0].makeTabbable();
 
-      if ($list.children().length) {
-        $('<div/>', {
-          id: 'h5p-intro-' + numInstances,
-          'class': 'h5p-memory-hidden-read',
-          html: parameters.l10n.label,
-          appendTo: $container
-        });
-        $list.appendTo($container);
-
-        $bottom = $('<div/>', {
+      if ($leftlist.children().length) {
+        $top = $('<div/>', {
           'class': 'h5p-programatically-focusable',
           tabindex: '-1',
           appendTo: $container
         });
         $taskComplete = $('<div/>', {
-          'class': 'h5p-memory-complete h5p-memory-hidden-read',
+          'class': 'h5p-pair-complete h5p-pair-hidden-read',
           html: parameters.l10n.done,
-          appendTo: $bottom
+          appendTo: $top
         });
 
-        $feedback = $('<div class="h5p-feedback">' + parameters.l10n.feedback + '</div>').appendTo($bottom);
+        $feedback = $('<div class="h5p-feedback">' + parameters.l10n.feedback + '</div>').appendTo($top);
 
         // Add status bar
         var $status = $('<dl class="h5p-status">' +
                         '<dt>' + parameters.l10n.timeSpent + ':</dt>' +
-                        '<dd class="h5p-time-spent"><time role="timer" datetime="PT0M0S">0:00</time><span class="h5p-memory-hidden-read">.</span></dd>' +
-                        '</dl>').appendTo($bottom);
+                        '<dd class="h5p-time-spent"><time role="timer" datetime="PT0M0S">0:00</time><span class="h5p-pair-hidden-read">.</span></dd>' +
+                        '</dl>').appendTo($top);
 
         timer = new PairGame.Timer($status.find('time')[0]);
         popup = new PairGame.Popup($container, parameters.l10n);
+
+        $('<div/>', {
+          id: 'h5p-intro-' + numInstances,
+          'class': 'h5p-pair-hidden-read',
+          html: parameters.l10n.label,
+          appendTo: $container
+        });
+        $leftlist.appendTo($container);
+        $rightlist.appendTo($container);
 
         $container.click(function () {
           popup.close();

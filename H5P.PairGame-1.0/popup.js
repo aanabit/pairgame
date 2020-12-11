@@ -13,12 +13,12 @@
 
     var closed;
 
-    var $popup = $('<div class="h5p-memory-pop" role="dialog"><div class="h5p-memory-top"></div><div class="h5p-memory-desc h5p-programatically-focusable" tabindex="-1"></div><div class="h5p-memory-close" role="button" tabindex="0" title="' + (l10n.closeLabel || 'Close') + '" aria-label="' + (l10n.closeLabel || 'Close') + '"></div></div>').appendTo($container);
-    var $desc = $popup.find('.h5p-memory-desc');
-    var $top = $popup.find('.h5p-memory-top');
+    var $popup = $('<div class="h5p-pair-pop" role="dialog"><div class="h5p-pair-top"></div><div class="h5p-pair-desc h5p-programatically-focusable" tabindex="-1"></div><div class="h5p-pair-close" role="button" tabindex="0" title="' + (l10n.closeLabel || 'Close') + '" aria-label="' + (l10n.closeLabel || 'Close') + '"></div></div>').appendTo($container);
+    var $desc = $popup.find('.h5p-pair-desc');
+    var $top = $popup.find('.h5p-pair-top');
 
     // Hook up the close button
-    $popup.find('.h5p-memory-close').on('click', function () {
+    $popup.find('.h5p-pair-close').on('click', function () {
       self.close(true);
     }).on('keypress', function (event) {
       if (event.which === 13 || event.which === 32) {
@@ -32,13 +32,17 @@
      *
      * @param {string} desc
      * @param {H5P.jQuery[]} imgs
+     * @param {string[]} texts
      * @param {function} done
      */
-    self.show = function (desc, imgs, styles, done) {
+    self.show = function (desc, imgs, texts, styles, done) {
       $desc.html(desc);
-      $top.html('').toggleClass('h5p-memory-two-images', imgs.length > 1);
+      $top.html('').toggleClass('h5p-pair-two-images', imgs.length > 1);
       for (var i = 0; i < imgs.length; i++) {
-        $('<div class="h5p-memory-image"' + (styles ? styles : '') + '></div>').append(imgs[i]).appendTo($top);
+        $('<div class="h5p-pair-image"' + (styles ? styles : '') + '></div>').append(imgs[i]).appendTo($top);
+      }
+      for (var j = 0; j < texts.length; j++) {
+        $('<div class="h5p-pair-image"' + (styles ? styles : '') + '></div>').append(texts[j]).appendTo($top);
       }
       $popup.show();
       $desc.focus();

@@ -3,7 +3,7 @@
   "description": "See how many elements you can pair!",
   "majorVersion": 1,
   "minorVersion": 0,
-  "patchVersion": 80,
+  "patchVersion": 132,
   "runnable": 1,
   "author": "Amaia Anabitarte",
   "license": "MIT",
@@ -49,6 +49,11 @@
       "machineName": "H5PEditor.VerticalTabs",
       "majorVersion": 1,
       "minorVersion": 3
+    },
+    {
+      "machineName": "H5PEditor.ShowWhen",
+      "majorVersion": 1,
+      "minorVersion": 0
     }
   ]
 }

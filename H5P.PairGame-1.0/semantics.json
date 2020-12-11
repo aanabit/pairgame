@@ -20,49 +20,143 @@
       "importance": "high",
       "fields": [
         {
+          "name": "pairType",
+          "type": "select",
+          "label": "Pair type",
+          "importance": "high",
+          "options": [
+            {
+              "value": "texts",
+              "label": "Text - Text"
+            },
+            {
+              "value": "images",
+              "label": "Image - Image"
+            },
+            {
+              "value": "mixed",
+              "label": "Image - Text"
+            }
+          ],
+          "default": "texts"
+        },
+        {
           "name": "pairingimage",
           "type": "image",
           "label": "Image",
-          "importance": "high",
-          "ratio": 1
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "images",
+                  "mixed"
+                ]
+              }
+            ]
+          },
+          "importance": "high"
         },
         {
           "name": "pairingimagealt",
           "type": "text",
           "label": "Alternative text for Image",
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "images",
+                  "mixed"
+                ]
+              }
+            ]
+          },
           "importance": "high",
-          "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
+          "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users.",
+          "maxLength": 50
         },
         {
           "name": "pairingtext",
           "type": "text",
-          "label": "Text to pair",
+          "label": "Main text",
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "texts"
+                ]
+              }
+            ]
+          },
+          "entity": "content",
+          "options": [
+            "H5P.AdvancedText 1.1"
+          ],
           "importance": "high",
-          "widget": "html",
-          "tags": ["strong", "em", "u", "strike", "ul", "ol"]
+          "tags": ["strong", "em", "u", "strike", "ul", "ol"],
+          "maxLength": 50
         },
         {
           "name": "matchingimage",
           "type": "image",
           "label": "Matching Image",
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "images"
+                ]
+              }
+            ]
+          },
           "importance": "high",
-          "description": "The image to match against.",
-          "ratio": 1
+          "description": "The image to match against."
         },
         {
           "name": "matchingimagealt",
           "type": "text",
           "label": "Alternative text for Matching Image",
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "images"
+                ]
+              }
+            ]
+          },
           "importance": "high",
-          "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
+          "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users.",
+          "maxLength": 50
         },
         {
           "name": "matchingtext",
           "type": "text",
           "label": "Text to pair",
+          "widget": "showWhen",
+          "showWhen": {
+            "rules": [
+              {
+                "field": "pairType",
+                "equals": [
+                  "texts",
+                  "mixed"
+                ]
+              }
+            ]
+          },
           "importance": "high",
-          "widget": "textarea",
-          "tags": ["strong", "em", "u", "strike", "ul", "ol"]
+          "tags": ["strong", "em", "u", "strike", "ul", "ol"],
+          "maxLength": 50
         },
         {
           "name": "feedback",
@@ -102,11 +196,24 @@
     "optional": true,
     "fields": [
       {
-        "name": "themeColor",
+        "name": "backgroundColor",
         "type": "text",
-        "label": "Theme Color",
+        "label": "Background Color",
         "importance": "low",
-        "description": "Choose a color to create a theme for your pairing game.",
+        "description": "Choose a color for the text cards background.",
+        "optional": true,
+        "default": "#909090",
+        "widget": "colorSelector",
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "fontColor",
+        "type": "text",
+        "label": "Font Color",
+        "importance": "low",
+        "description": "Choose a color for the text cards font.",
         "optional": true,
         "default": "#909090",
         "widget": "colorSelector",
@@ -123,13 +230,6 @@
     "type": "group",
     "common": true,
     "fields": [
-      {
-        "label": "Pair turns text",
-        "importance": "low",
-        "name": "cardTurns",
-        "type": "text",
-        "default": "Card turns"
-      },
       {
         "label": "Time spent text",
         "importance": "low",
@@ -163,33 +263,33 @@
         "importance": "low",
         "name": "label",
         "type": "text",
-        "default": "Memory Game. Find the matching cards."
+        "default": "Pair Game. Find the matching pairs."
       },
       {
         "label": "Game finished label",
         "importance": "low",
         "name": "done",
         "type": "text",
-        "default": "All of the cards have been found."
+        "default": "All pairs have been found."
       },
       {
-        "label": "Card indexing label",
+        "label": "Pair indexing label",
         "importance": "low",
-        "name": "cardPrefix",
+        "name": "pairPrefix",
         "type": "text",
-        "default": "Card %num:"
+        "default": "Pair %num:"
       },
       {
-        "label": "Card unturned label",
+        "label": "Pair unturned label",
         "importance": "low",
-        "name": "cardUnturned",
+        "name": "pairUnturned",
         "type": "text",
         "default": "Unturned."
       },
       {
-        "label": "Card matched label",
+        "label": "Pair matched label",
         "importance": "low",
-        "name": "cardMatched",
+        "name": "pairMatched",
         "type": "text",
         "default": "Match found."
       }
